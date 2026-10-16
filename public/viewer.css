@@ -8,4 +8,5 @@
 @media(min-width:591px) and (max-width:850px){.count-number.is-very-long{font-size:clamp(33px,8vw,65px);letter-spacing:-2px}}
 @media(max-width:590px){.count-number.is-medium{font-size:143px;letter-spacing:-8px}.count-number.is-long{font-size:82px}.count-number.is-very-long{font-size:30px;letter-spacing:-1px;overflow-wrap:anywhere}.count-number.is-very-long+.number-period{font-size:50px;padding-top:10px}}
 @media(max-width:360px){.count-number.is-medium{font-size:127px}.count-number.is-long{font-size:69px}.count-number.is-very-long{font-size:25px}}
+.accuracy-notice{margin-top:18px;font-size:12px;line-height:1.6;color:#6e7a60}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
