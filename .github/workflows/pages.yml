@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test counting, audio and optional local server
+      - name: Validate the public count display
         run: npm test
       - name: Configure Pages
         uses: actions/configure-pages@v5

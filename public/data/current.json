@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "count": null,
+  "lectureDate": "2026-10-16",
+  "updatedAt": null,
+  "liveEndpoint": "https://ja-lecture-count-relay.shrewdhare17.chatgpt.site/api/count"
+}

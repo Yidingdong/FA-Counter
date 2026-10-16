@@ -1,12 +1,9 @@
 {
-  "name": "ja-counter",
-  "version": "1.0.0",
+  "name": "ja-counter-public-display",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Count German ja interjections in English lectures with OpenAI Whisper.",
-  "scripts": {
-    "start": "node server.mjs",
-    "test": "node --test server.test.mjs tests/*.test.mjs"
-  },
+  "description": "Public display of the final Friday lecture ja count. Counting remains on the owner's laptop.",
+  "scripts": { "test": "node --test tests/viewer.test.mjs" },
   "engines": { "node": ">=22" }
 }

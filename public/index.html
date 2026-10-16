@@ -3,151 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://api.openai.com; img-src 'self' data:; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#f6f5ef">
-  <meta name="description" content="A little counter for a familiar lecture habit. Listen with OpenAI Whisper and keep track of every ja.">
-  <title>ja. — A little lecture counter</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23d8fa5b'/%3E%3Ctext x='8' y='46' font-family='Arial,sans-serif' font-size='44' font-weight='bold' fill='%23212622'%3Eja.%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.js"></script>
+  <meta name="description" content="One little word. The ja count from Friday’s lecture, updated live.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://ja-lecture-count-relay.shrewdhare17.chatgpt.site; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>ja. — Friday lecture counter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23d9fa65'/%3E%3Ctext x='8' y='46' font-family='Arial,sans-serif' font-size='44' font-weight='bold' fill='%23252c26'%3Eja.%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./viewer.css">
+  <script type="module" src="./viewer.js"></script>
 </head>
 <body>
-  <div class="site-shell">
+  <div class="page-shell">
     <header class="site-header">
-      <a class="brand" href="./" aria-label="ja. Lecture counter home">
-        <span class="brand-mark">ja<span>.</span></span>
-        <span class="brand-caption">LECTURE<br>COUNTER</span>
-      </a>
-      <div class="header-actions">
-        <span class="powered-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3"/></svg>Powered by OpenAI Whisper</span>
-        <button id="settings-btn" class="icon-button settings-button" type="button" aria-label="Open settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 3-.7 2.3-2.2 1.3-2.3-.6L2 10l1.7 1.7v2.6L2 16l2.3 4 2.3-.6 2.2 1.3.7 2.3h5l.7-2.3 2.2-1.3 2.3.6L22 16l-1.7-1.7v-2.6L22 10l-2.3-4-2.3.6-2.2-1.3L14.5 3Z" transform="translate(0 -1) scale(1 .95)"/><circle cx="12" cy="12" r="3.2"/></svg></button>
-      </div>
+      <div class="brand" aria-label="ja. Lecture counter"><span class="brand-mark">ja<span>.</span></span><span class="brand-caption">LECTURE<br>COUNTER</span></div>
+      <span class="header-note">A FAMILIAR FRIDAY HABIT.</span>
     </header>
-
     <main>
-      <section class="hero" aria-labelledby="page-heading">
-        <div>
-          <div class="eyebrow"><span class="tiny-star" aria-hidden="true">✳</span> A LITTLE TOOL FOR A FAMILIAR HABIT</div>
-          <h1 id="page-heading">Every <span class="ja-highlight">“ja”.</span><br>Accounted for.</h1>
-        </div>
-        <div class="hero-note">
-          <div class="speech-mark" aria-hidden="true">ja?</div>
-          <p>English lectures.<br>German habits.</p>
-          <span>Listen. Transcribe. Lose count of nothing.</span>
-        </div>
+      <section class="lecture-card" aria-labelledby="count-heading">
+        <div class="card-topline"><h1 id="count-heading">THE LECTURE COUNT</h1><span class="card-edition">ENGLISH LECTURE. GERMAN HABITS.</span></div>
+        <div class="lecture-date-wrap"><span class="field-label">LECTURE DATE</span><time id="lecture-date" datetime="2026-10-16">Friday, 16 October 2026</time></div>
+        <div class="number-stage" aria-live="polite" aria-atomic="true"><span id="count" class="count-number" aria-label="No count published yet">—</span><span class="number-period" aria-hidden="true">.</span></div>
+        <div class="card-bottomline"><p id="count-caption">Waiting for the first update</p><span class="ja-label" aria-hidden="true">ja, ja, ja.</span></div>
       </section>
-
-      <div id="error-banner" class="error-banner" role="alert" hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 4h.01"/></svg>
-        <span id="error-message"></span>
-        <button id="retry-btn" class="text-button" type="button" hidden>Try again <span aria-hidden="true">↗</span></button>
+      <div class="update-row">
+        <div class="updated-at"><span class="field-label">LAST UPDATED</span><time id="updated-at">Not published yet</time><span class="timezone-note">BERLIN TIME</span></div>
+        <div id="refresh-status" class="refresh-status" role="status" aria-live="polite" data-state="checking"><span class="status-dot" aria-hidden="true"></span><span id="refresh-text">Checking for updates</span></div>
       </div>
-
-      <section class="session-grid" aria-label="Lecture session">
-        <div class="counter-card">
-          <div class="counter-topline">
-            <span class="card-kicker">THE JA COUNT</span>
-            <span class="session-status"><span id="status-dot" class="status-dot"></span><span id="status-text">Ready when you are</span></span>
-          </div>
-          <div class="count-stage">
-            <div class="count-number-wrap"><span id="count" class="count-number" aria-live="polite" aria-atomic="true">0</span><span class="count-period" aria-hidden="true">.</span></div>
-            <div class="count-description"><span>little word.</span><span>big energy.</span></div>
-            <div class="adjust-controls" aria-label="Correct the count manually">
-              <button id="adjust-minus" class="adjust-button" type="button" aria-label="Subtract one ja" title="Subtract one"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10"/></svg></button>
-              <button id="adjust-plus" class="adjust-button" type="button" aria-label="Add one ja" title="Add one"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10M10 5v10"/></svg></button>
-            </div>
-          </div>
-          <div class="session-stats">
-            <div><span class="stat-label">SESSION TIME</span><span id="elapsed" class="stat-value">00:00</span></div>
-            <div><span class="stat-label">TOTAL WORDS</span><span id="word-total" class="stat-value">0</span></div>
-            <div><span class="stat-label">JA / MINUTE</span><span id="rate" class="stat-value">0.0</span></div>
-            <div><span class="stat-label">LAST JA</span><span id="last-ja" class="stat-value">—</span></div>
-          </div>
-          <div class="frequency-chart">
-            <div class="chart-heading"><span>THE RHYTHM OF THE LECTURE</span><span class="chart-key"><i></i> Ja frequency</span></div>
-            <div class="chart-plot">
-              <svg id="chart" viewBox="0 0 600 100" preserveAspectRatio="none" role="img" aria-label="Ja frequency throughout the lecture"></svg>
-              <div id="chart-empty" class="chart-empty"><span></span><p>A quiet start. Your lecture’s rhythm will appear here.</p></div>
-            </div>
-            <div class="chart-axis"><span>START</span><span>NOW</span></div>
-          </div>
-        </div>
-
-        <aside class="controls-card" aria-labelledby="session-heading">
-          <div class="controls-heading"><h2 id="session-heading">Let’s hear it.</h2><span class="section-index">01 / INPUT</span></div>
-          <div class="input-tabs" role="tablist" aria-label="Audio source">
-            <button id="mode-live" type="button" class="input-tab active" role="tab" aria-selected="true" aria-controls="live-controls"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="2" width="6" height="10" rx="3"/><path d="M4.5 9v1a5.5 5.5 0 0 0 11 0V9M10 15.5V18m-3 0h6"/></svg>Microphone</button>
-            <button id="mode-file" type="button" class="input-tab" role="tab" aria-selected="false" aria-controls="file-controls"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13V2m-4 4 4-4 4 4M3 12v5h14v-5"/></svg>Upload audio</button>
-          </div>
-          <label for="session-title" class="field-label">SESSION NAME</label>
-          <input id="session-title" class="text-input session-name" type="text" maxlength="120" value="Untitled lecture" placeholder="e.g. Monday’s statistics lecture" autocomplete="off">
-          <div id="live-controls" class="source-controls" role="tabpanel" aria-labelledby="mode-live">
-            <label for="mic-select" class="field-label">MICROPHONE</label>
-            <div class="select-wrap"><select id="mic-select"><option value="">Default microphone</option></select><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></div>
-            <div class="audio-level"><span>INPUT LEVEL</span><div class="level-track"><div id="level-meter" class="level-meter" role="meter" aria-label="Microphone input level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div><span class="level-label">MIC</span></div>
-            <button id="start-btn" type="button" class="primary-button"><span class="button-content"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="2" width="6" height="10" rx="3"/><path d="M4.5 9v1a5.5 5.5 0 0 0 11 0V9M10 15.5V18m-3 0h6"/></svg>Start listening</span><svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button>
-            <button id="stop-btn" type="button" class="secondary-button" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="5" width="10" height="10" rx="1"/></svg>Finish session</button>
-          </div>
-          <div id="file-controls" class="source-controls" role="tabpanel" aria-labelledby="mode-file" hidden>
-            <label class="upload-zone" for="file-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-4 4 4-4 4 4M4 15v6h16v-6"/></svg><strong id="file-label">Choose a lecture recording</strong><span>Audio or video · up to 200 MB</span><input id="file-input" type="file" accept="audio/*,video/*,.mp3,.mp4,.mpeg,.mpga,.m4a,.wav,.webm,.flac,.ogg"></label>
-            <button id="analyze-btn" type="button" class="primary-button" disabled><span class="button-content">Count the jas</span><svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button>
-          </div>
-          <div id="progress-wrap" class="progress-wrap" hidden><div class="progress-heading"><span id="progress-label">Transcribing your lecture…</span><span class="progress-note">WHISPER AT WORK</span></div><progress id="progress" max="100" value="0">0%</progress></div>
-          <div class="count-options">
-            <div class="options-heading"><span class="field-label">WHAT COUNTS?</span><span class="strict-label">“ja” by default</span></div>
-            <label class="checkbox-row"><input id="include-variants" type="checkbox"><span>Also count “yeah” and “ya”</span></label>
-            <label class="checkbox-row"><input id="end-only" type="checkbox"><span>Only sentence-ending “ja” <span class="hint-label" title="Estimated from transcript punctuation. Spoken sentence boundaries can be ambiguous.">ESTIMATE</span></span></label>
-          </div>
-          <p class="control-footnote"><span class="little-dot" aria-hidden="true"></span> Live counts update about every 12 seconds as Whisper listens.</p>
-        </aside>
-      </section>
-
-      <div class="session-toolbar">
-        <div class="review-note"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h8M4 15h6m4-3 2 2 3-4"/></svg><span>Whisper listens. You have the final word.</span></div>
-        <div class="toolbar-buttons">
-          <button id="demo-btn" type="button" class="text-button demo-button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg>Try a sample</button>
-          <span class="toolbar-divider" aria-hidden="true"></span>
-          <button id="export-btn" type="button" class="text-button" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v11m-4-4 4 4 4-4M3 13v4h14v-4"/></svg>Export</button>
-          <button id="reset-btn" type="button" class="text-button reset-button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7a6.5 6.5 0 1 1-.4 5M4 3v4h4"/></svg>Reset</button>
-        </div>
-      </div>
-
-      <section class="results-grid" aria-label="Session transcript and detections">
-        <div class="results-card transcript-card">
-          <div class="results-heading"><div><span class="section-index">02 / THE WORDS</span><h2>Live transcript<span class="small-period">.</span></h2></div><span class="transcript-tag"><span></span>WHISPER</span></div>
-          <div id="transcript" class="transcript" aria-live="polite" aria-relevant="additions text"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 8h16M6 14h11M6 20h7"/><path class="accent-stroke" d="m19 18 3 3 4-5"/></svg></div><p>First, a little listening.</p><span>Your transcript appears here as the lecture unfolds.<br>Every detected <mark>ja</mark> gets its moment.</span></div></div>
-          <div class="transcript-footer"><span class="highlight-key"><i></i> A little highlight for every “ja”</span><span>EN / DE</span></div>
-        </div>
-        <div class="results-card detections-card">
-          <div class="results-heading"><div><span class="section-index">03 / THE EVIDENCE</span><h2>Caught in the act<span class="small-period">.</span></h2></div><span id="match-count" class="match-count">0</span></div>
-          <div id="detections" class="detections" aria-live="polite" aria-relevant="additions removals"><div class="empty-state detection-empty"><div class="ja-stamp" aria-hidden="true">ja<span>!</span></div><p>No jas. Yet.</p><span>When one lands, you’ll find it here<br>with a timestamp and a little context.</span></div></div>
-          <div class="detections-footer"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4m0-7h.01"/></svg>False alarm? Remove a detection to correct the count.</div>
-        </div>
-      </section>
-
-      <section class="results-card word-frequency" aria-labelledby="word-heading">
-        <div class="results-heading word-frequency-heading"><div><span class="section-index">04 / EVERY OTHER WORD, TOO</span><h2 id="word-heading">The whole vocabulary<span class="small-period">.</span></h2><p class="vocabulary-note">Every spoken word, counted as the lecture unfolds.</p></div><span id="unique-words" class="vocabulary-total">0 unique words</span></div>
-        <div class="word-tools"><label class="word-search-wrap" for="word-search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="word-search" type="search" placeholder="Find a word…" aria-label="Search word frequencies" autocomplete="off"></label><div class="word-sort-wrap"><label for="word-sort">SORT BY</label><div class="select-wrap"><select id="word-sort"><option value="frequency" selected>Most frequent</option><option value="alphabetical">A to Z</option></select><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></div></div></div>
-        <div class="word-table-wrap"><table class="word-table"><thead><tr><th scope="col" aria-label="Rank">#</th><th scope="col">WORD</th><th scope="col">MENTIONS</th><th scope="col">SHARE OF LECTURE</th></tr></thead><tbody id="word-table"></tbody></table><div id="word-empty" class="empty-state word-empty"><div class="word-empty-symbol" aria-hidden="true">Aa<span>.</span></div><p>A lecture has a lot to say.</p><span>Start listening to see which words come up the most.</span></div></div>
-        <div class="word-frequency-footer"><span>Uppercase and lowercase counted together. Punctuation left out.</span><span>WORDS, WORDS, WORDS.</span></div>
-      </section>
-      <footer class="site-footer"><span class="footer-mark">ja.</span><p>Audio is sent directly to OpenAI when you start. API charges apply. Counts are estimates; review the transcript.<br>Your API key stays in memory for this tab and is never saved to browser storage.</p><span class="footer-signoff">FOR THE LOVE<br>OF THE LECTURE.</span></footer>
+      <noscript><p class="noscript-note">Enable JavaScript to see the latest lecture count.</p></noscript>
     </main>
+    <footer class="site-footer"><span>ONE LITTLE WORD. EVERY FRIDAY.</span><span>UPDATES AUTOMATICALLY.</span></footer>
   </div>
-
-  <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
-    <form id="settings-form" method="dialog">
-      <div class="dialog-heading"><div><span class="section-index">A LITTLE SETUP</span><h2 id="settings-title">Your listening kit.</h2></div><button id="settings-close" type="button" class="icon-button" aria-label="Close settings"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M5 15 15 5"/></svg></button></div>
-      <p class="dialog-intro">Connect to Whisper and make yourself comfortable.</p>
-      <label for="api-key" class="field-label">OPENAI API KEY</label>
-      <input id="api-key" class="text-input" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false" aria-describedby="key-status">
-      <p id="key-status" class="field-help">Kept in memory for this tab. Never saved to browser storage.</p>
-      <label for="language-select" class="field-label">LECTURE LANGUAGE</label>
-      <div class="select-wrap"><select id="language-select"><option value="auto" selected>Auto-detect · recommended for English + German</option><option value="en">English</option><option value="de">German</option></select><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4"/></svg></div>
-      <p class="field-help">Start with auto-detect. If “ja” is missed, try the German hint and compare a short recording. Mixed-language recognition can vary.</p>
-      <div class="settings-model"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v16M2 10h16M4.35 4.35l11.3 11.3M4.35 15.65l11.3-11.3"/></svg><div><strong>OpenAI Whisper</strong><span>Audio transcription · whisper-1</span></div><span class="model-pill">API</span></div>
-      <button id="settings-save" type="submit" class="primary-button"><span>Save settings</span><svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button>
-    </form>
-  </dialog>
 </body>
 </html>
