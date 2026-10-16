@@ -6,6 +6,73 @@ let hasLoaded = false;
 let endpoint = null;
 let timer;
 let failures = 0;
+const observationIds = ['observed-change', 'observed-rate', 'observed-duration', 'observed-last-change', 'observation-note', 'activity-scale', 'activity-description'];
+const observationElements = Object.fromEntries(observationIds.map(id => [id, document.getElementById(id)]));
+const activityBars = Array.from({ length: 10 }, (_, i) => document.getElementById(`activity-bar-${i}`));
+const receivedTimeFormat = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+let observation = null;
+
+function signed(value, decimals = 0) {
+  return `${value > 0 ? '+' : ''}${value.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+}
+
+function observe(data) {
+  // Public bootstrap data is not an observation. Only received published snapshots enter these statistics.
+  if (data.count === null) { observation = null; renderObservation(); return; }
+  const now = Date.now();
+  if (!observation || observation.date !== data.lectureDate) {
+    observation = { date: data.lectureDate, start: now, end: now, baseline: data.count, count: data.count, changes: [], lastChange: null, seenMinutes: new Set([Math.floor(now / 60000)]) };
+  } else {
+    const delta = data.count - observation.count;
+    if (delta) {
+      observation.changes.push({ time: now, delta });
+      observation.lastChange = now;
+    }
+    observation.count = data.count;
+    observation.end = now;
+    observation.changes = observation.changes.filter(change => change.time >= now - 10 * 60 * 1000);
+    observation.seenMinutes.add(Math.floor(now / 60000));
+    observation.seenMinutes = new Set([...observation.seenMinutes].filter(minute => minute >= Math.floor(now / 60000) - 9));
+  }
+  renderObservation();
+}
+
+function renderObservation() {
+  // The guard also permits a previously cached, count-only HTML page to use the updated script.
+  if (observationIds.some(id => !observationElements[id]) || activityBars.some(bar => !bar)) return;
+  const bins = new Array(10).fill(0);
+  let minute = 0;
+  if (!observation) {
+    for (const id of ['observed-change', 'observed-rate', 'observed-duration', 'observed-last-change']) observationElements[id].textContent = '—';
+    observationElements['observation-note'].textContent = 'Waiting for a published count. Opening this page does not reset the lecture counter.';
+  } else {
+    const seconds = Math.max(0, (observation.end - observation.start) / 1000);
+    const delta = observation.count - observation.baseline;
+    observationElements['observed-change'].textContent = signed(delta);
+    observationElements['observed-rate'].textContent = seconds >= 30 ? signed(delta / (seconds / 60), 1) : '—';
+    observationElements['observed-duration'].textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
+    observationElements['observed-last-change'].textContent = observation.lastChange === null ? 'Not yet' : receivedTimeFormat.format(new Date(observation.lastChange));
+    observationElements['observation-note'].textContent = `Observing since ${receivedTimeFormat.format(new Date(observation.start))} Berlin time. Changes are net updates, including manual corrections; the lecture may have started earlier.`;
+    minute = Math.floor(observation.end / 60000);
+    for (const change of observation.changes) {
+      const bin = Math.floor(change.time / 60000) - minute + 9;
+      if (bin >= 0 && bin < 10) bins[bin] += change.delta;
+    }
+  }
+  const max = Math.max(1, ...bins.map(value => Math.abs(value)));
+  for (let index = 0; index < 10; index++) {
+    const bar = activityBars[index];
+    const delta = bins[index];
+    const height = delta ? Math.abs(delta) / max * 60 : 2;
+    const unobserved = !observation || !observation.seenMinutes.has(minute - 9 + index);
+    bar.setAttribute('y', delta > 0 ? String(76 - height) : delta < 0 ? '76' : '74');
+    bar.setAttribute('height', String(height));
+    bar.classList.toggle('negative', delta < 0);
+    bar.classList.toggle('unobserved', unobserved);
+  }
+  observationElements['activity-scale'].textContent = `NET CHANGE PER MINUTE · SCALE ${max}`;
+  observationElements['activity-description'].textContent = observation ? `Net count changes received in the last ten calendar minutes, oldest first: ${bins.map(value => signed(value)).join(', ')}. Grey periods were not observed; values below zero are corrections.` : 'Waiting for published count updates. Grey periods have not been observed.';
+}
 
 function validDate(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -72,17 +139,19 @@ function schedule(delay) {
 async function refresh() {
   if (refreshing) return;
   refreshing = true;
-  let delay = endpoint ? 2000 : 15000;
+  let delay = endpoint ? 1000 : 15000;
   try {
     if (endpoint) {
       const data = validate(await request(endpoint));
       render(data);
+      observe(data);
       status(data.live === true ? 'Live from the lecture' : data.count === null ? 'Waiting for the lecture' : 'Latest lecture count', data.live === true ? 'live' : 'connected');
     } else {
       const data = validate(await request(new URL('./data/current.json', import.meta.url)), true);
       const configuredEndpoint = liveEndpoint(data.liveEndpoint);
       render(data);
       endpoint = configuredEndpoint;
+      if (!endpoint) observe(data);
       status(endpoint ? 'Connecting to the lecture' : 'Updates automatically', endpoint ? 'checking' : 'connected');
       delay = endpoint ? 0 : 15000;
     }

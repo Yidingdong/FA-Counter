@@ -8,14 +8,14 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://ja-lecture-count-relay.shrewdhare17.chatgpt.site; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
   <title>ja. — Friday lecture counter</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23d9fa65'/%3E%3Ctext x='8' y='46' font-family='Arial,sans-serif' font-size='44' font-weight='bold' fill='%23252c26'%3Eja.%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./viewer.css">
-  <script type="module" src="./viewer.js"></script>
+  <link rel="stylesheet" href="./viewer.css?v=20261016-stats">
+  <script type="module" src="./viewer.js?v=20261016-stats"></script>
 </head>
 <body>
   <div class="page-shell">
     <header class="site-header">
       <div class="brand" aria-label="ja. Lecture counter"><span class="brand-mark">ja<span>.</span></span><span class="brand-caption">LECTURE<br>COUNTER</span></div>
-      <span class="header-note">A FAMILIAR FRIDAY HABIT.</span>
+      <nav class="header-nav" aria-label="About this counter"><a href="#observation-heading">Statistics</a><a href="#transparency-heading">How it works</a></nav>
     </header>
     <main>
       <section class="lecture-card" aria-labelledby="count-heading">
@@ -29,6 +29,55 @@
         <div id="refresh-status" class="refresh-status" role="status" aria-live="polite" data-state="checking"><span class="status-dot" aria-hidden="true"></span><span id="refresh-text">Checking for updates</span></div>
       </div>
       <p class="accuracy-notice">This website is vibecoded and may contain mistakes. Counts may be inaccurate.</p>
+      <section class="observation-section" aria-labelledby="observation-heading">
+        <div class="section-heading"><div><span class="section-kicker">A LITTLE CONTEXT</span><h2 id="observation-heading">While you’re watching.</h2></div><span class="visit-badge">THIS VISIT ONLY</span></div>
+        <p class="section-intro">These statistics begin with the first published count this page receives. They describe updates observed during your visit, not the complete lecture or the exact timing of spoken words.</p>
+        <dl class="observation-grid">
+          <div><dt>Observed net change</dt><dd id="observed-change">—</dd><dd class="stat-detail">Since this page connected</dd></div>
+          <div><dt>Observed change / minute</dt><dd id="observed-rate">—</dd><dd class="stat-detail">Available after 30 seconds</dd></div>
+          <div><dt>Observation time</dt><dd id="observed-duration">—</dd><dd class="stat-detail">Through the last received update</dd></div>
+          <div><dt>Last change received</dt><dd id="observed-last-change">—</dd><dd class="stat-detail">Berlin time · not a speech timestamp</dd></div>
+        </dl>
+        <div class="activity-panel">
+          <div class="activity-heading"><h3>Recent count changes</h3><span id="activity-scale">NET CHANGE PER MINUTE</span></div>
+          <svg class="activity-chart" viewBox="0 0 600 150" role="img" aria-labelledby="activity-description" preserveAspectRatio="none">
+            <title id="activity-description">Waiting for published count updates. Grey periods have not been observed.</title>
+            <line x1="0" y1="76" x2="600" y2="76" class="activity-baseline"/>
+            <rect id="activity-bar-0" x="8" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-1" x="68" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-2" x="128" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-3" x="188" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-4" x="248" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-5" x="308" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-6" x="368" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-7" x="428" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-8" x="488" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+            <rect id="activity-bar-9" x="548" y="74" width="44" height="2" rx="3" class="activity-bar unobserved"/>
+          </svg>
+          <div class="activity-axis"><span>9 MINUTES AGO</span><span>NOW</span></div>
+          <p id="observation-note" class="observation-note">Waiting for a published count. Opening this page does not reset the lecture counter.</p>
+          <p class="chart-key"><span class="positive-key">Net increases</span><span class="negative-key">Net decreases / corrections</span><span>Grey = no observations; minutes may be partial</span></p>
+        </div>
+      </section>
+      <section class="transparency-section" aria-labelledby="transparency-heading">
+        <div class="section-heading"><div><span class="section-kicker">OPEN ABOUT THE PROCESS</span><h2 id="transparency-heading">From voice to number.</h2></div></div>
+        <p class="section-intro">This is an automated estimate reviewed by the operator. The public website displays a result; it does not listen to visitors or run speech recognition in their browsers.</p>
+        <ol class="architecture-flow">
+          <li><span class="flow-number">01</span><h3>Capture on a laptop</h3><p>The operator’s microphone records audio. Live mode defaults to 4-second windows, with a short overlap to give words near a cut more context.</p></li>
+          <li><span class="flow-number">02</span><h3>Transcribe with Whisper</h3><p>Audio windows are sent to OpenAI’s <code>whisper-1</code> transcription API using the operator’s key. The result includes text and word timestamps.</p></li>
+          <li><span class="flow-number">03</span><h3>Count locally</h3><p>The laptop finds whole-word matches. Timestamps assign overlapping audio to one window to reduce duplicate counting.</p></li>
+          <li><span class="flow-number">04</span><h3>Publish a small snapshot</h3><p>An authenticated laptop request sends the count, lecture date, and live flag to a hosted relay. The relay adds an update time and stores the latest snapshot.</p></li>
+          <li><span class="flow-number">05</span><h3>Display publicly</h3><p>This GitHub Pages site reads the relay about once per second. The statistics above are calculated from the count changes this browser receives.</p></li>
+        </ol>
+        <div class="transparency-details">
+          <article><h3>What counts as “ja”?</h3><p>The default counts the complete word “ja”, ignoring case and surrounding punctuation. “Java” does not count. The operator can also enable “yeah”/“ya”, estimate sentence-ending uses, exclude detections, or adjust the total manually. The current public feed does not report which options are selected.</p></article>
+          <article><h3>Why isn’t it instant?</h3><p>Audio must first fill a window, then be uploaded and processed. Up to two transcription windows can be in flight, but results are applied in recording order. Publishing and the website’s next check add more delay. The operator can choose 4-, 8-, or 12-second live windows.</p></article>
+          <article><h3>What is shared?</h3><p>Audio is sent to OpenAI for transcription. Recordings, transcripts, detailed word frequencies, API keys, and the publishing credential are not delivered to public visitors. The relay is a Cloudflare Worker hosted through Sites. Its R2 storage holds the latest JSON count snapshot, not an audio recording. Visit statistics stay in this tab’s memory and restart when it is reloaded.</p></article>
+          <article><h3>What can be wrong?</h3><p>Noise, other speakers, short interjections, and switching between English and German can cause missed or incorrect words. The microphone does not identify the professor. Updates may arrive in batches, and manual corrections can lower the count. These visit statistics are not full-lecture averages or a measure of recognition accuracy.</p></article>
+        </div>
+        <p class="future-stats-note">Total spoken words, word frequencies, and full-lecture duration are not currently shared by the running counter. Those statistics can be connected later without guessing values here.</p>
+        <div class="transparency-links"><a href="https://github.com/Yidingdong/FA-Counter">Public website source ↗</a><a href="https://ja-lecture-count-relay.shrewdhare17.chatgpt.site/api/count">Inspect the public snapshot ↗</a><a href="https://developers.openai.com/api/docs/guides/speech-to-text">OpenAI transcription documentation ↗</a></div>
+      </section>
       <noscript><p class="noscript-note">Enable JavaScript to see the latest lecture count.</p></noscript>
     </main>
     <footer class="site-footer"><span>ONE LITTLE WORD. EVERY FRIDAY.</span><span>UPDATES AUTOMATICALLY.</span></footer>
